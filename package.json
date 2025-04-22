@@ -1,0 +1,24 @@
+{
+  "name": "playwright-website-scraper",
+  "version": "1.0.0",
+  "description": "A specialized web scraper for specific websites using Playwright",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "jest",
+    "example": "node examples/example.js",
+    "scrape:news": "node examples/news-scraper.js",
+    "scrape:product": "node examples/e-commerce-scraper.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.39.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
