@@ -1,13 +1,13 @@
-const { chromium } = require('playwright')
+import { chromium } from 'playwright'
 
 /**
  * 创建一个浏览器实例
  * @param {Object} options - 浏览器配置选项
  * @returns {Promise<Browser>} - 返回浏览器实例
  */
-async function createBrowser(options = {}) {
+export const createBrowser = async function createBrowser(options = {}) {
   const defaultOptions = {
-    headless: false,
+    headless: true,
     executablePath:
       process.env.CHROME_PATH ||
       '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' // 如果设置了环境变量，使用系统Chrome
@@ -23,6 +23,6 @@ async function createBrowser(options = {}) {
   })
 }
 
-module.exports = {
-  createBrowser
-}
+// module.exports = {
+//   createBrowser
+// }

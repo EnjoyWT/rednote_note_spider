@@ -1,5 +1,5 @@
-const { chromium } = require('playwright')
-
+// const { chromium } = require('playwright')
+import { chromium } from 'playwright'
 /**
  * 爬取单个网站的数据，使用已存在的浏览器实例
  * @param {Browser} browser - Playwright浏览器实例
@@ -8,7 +8,11 @@ const { chromium } = require('playwright')
  * @returns {Promise<Object>} - 返回爬取结果对象
  */
 
-async function redNoteWebsite(browser, url, options = {}) {
+export const redNoteWebsite = async function redNoteWebsite(
+  browser,
+  url,
+  options = {}
+) {
   const defaultOptions = {
     timeout: 30000,
     userAgent:
@@ -38,24 +42,36 @@ async function redNoteWebsite(browser, url, options = {}) {
     // 监听所有网络请求
     page.on('request', (request) => {
       const url = request.url()
+      // console.log(`捕获到请求: ${url}`)
       // 筛选可能的视频文件请求（根据后缀或 URL 关键字）
-      if (url.endsWith('.mp4') || url.endsWith('.m3u8')) {
+      if (
+        url.endsWith('.mp4') ||
+        url.endsWith('.m3u8') ||
+        url.includes('.mp4') ||
+        url.includes('.m3u8')
+      ) {
         videoUrls.add(url)
         console.log(`捕获到可能的视频请求: ${url}`)
       }
     })
     // 导航到目标URL
     await page.goto(url, { waitUntil: 'domcontentloaded' })
-    await page.waitForLoadState('networkidle')
-
+    // await page.waitForLoadState('networkidle')
+    try {
+      await page.waitForLoadState('networkidle', { timeout: 5000 }) // 最多等 60 秒
+    } catch (e) {
+      console.warn(
+        '⚠️ 页面长时间处于活跃状态，跳过 networkidle 检查，继续处理。'
+      )
+    }
     // 定义要爬取的数据结构
     const result = {
       url,
-      pageTitle: null,
-      pageContent: null,
-      pageEditorTimeCity: null,
-      pagePhotos: [],
-      pageType: 0,
+      title: null,
+      content: null,
+      editorTimeCity: null,
+      photoUrls: [],
+      type: 0,
       videoUrls: [],
       timestamp: new Date().toISOString()
     }
@@ -72,7 +88,7 @@ async function redNoteWebsite(browser, url, options = {}) {
       if (elementCount > 0) {
         console.log(`当前笔记是==视频类型`)
         isVideo = true
-        result.pageType = 1
+        result.type = 1
       } else {
         console.log(' 当前笔记是-图文类型 ')
       }
@@ -85,8 +101,8 @@ async function redNoteWebsite(browser, url, options = {}) {
       // const titleElement = await page.$('//*[@id="detail-title"]')
       const titleElement = page.locator('#detail-title') // 使用 CSS 选择器，更简洁
       if (titleElement) {
-        result.pageTitle = await titleElement.textContent()
-        console.log(`✅ 成功提取页面标题: ${result.pageTitle}`)
+        result.title = await titleElement.textContent()
+        console.log(`✅ 成功提取页面标题: ${result.title}`)
       }
     } catch (error) {
       console.error('❌ 提取页面标题时出错:', error.message)
@@ -94,8 +110,8 @@ async function redNoteWebsite(browser, url, options = {}) {
     try {
       const contentLocator = page.locator('#detail-desc') // 使用 CSS 选择器，更简洁
       if (contentLocator) {
-        result.pageContent = await contentLocator.textContent()
-        console.log(`✅ 成功提取页面内容: ${result.pageContent}`)
+        result.content = await contentLocator.textContent()
+        console.log(`✅ 成功提取页面内容: ${result.content}`)
       }
     } catch (error) {
       console.error('❌ 提取页面内容时出错:', error.message)
@@ -106,8 +122,8 @@ async function redNoteWebsite(browser, url, options = {}) {
         '#noteContainer > div.interaction-container > div.note-scroller > div.note-content > div.bottom-container > span.date'
       )
       if (editorTimeLocator) {
-        result.pageEditorTimeCity = await editorTimeLocator.textContent()
-        console.log(`✅ 成功提取页面编辑时间: ${result.pageEditorTimeCity}`)
+        result.editorTimeCity = await editorTimeLocator.textContent()
+        console.log(`✅ 成功提取页面编辑时间: ${result.editorTimeCity}`)
       }
     } catch (error) {
       console.error('❌ 提取页面编辑时间时出错:', error.message)
@@ -172,7 +188,7 @@ async function redNoteWebsite(browser, url, options = {}) {
           // imageUrls.forEach((url, index) => {
           //   console.log(`图片 ${index + 1}: ${url}`)
           // })
-          result.pagePhotos = imageUrls
+          result.photoUrls = imageUrls
         } else {
           console.log('❌ 没有找到轮播图中的图片')
         }
@@ -193,6 +209,6 @@ async function redNoteWebsite(browser, url, options = {}) {
   }
 }
 
-module.exports = {
-  redNoteWebsite
-}
+// module.exports = {
+//   redNoteWebsite
+// }
