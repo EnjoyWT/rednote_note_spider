@@ -70,7 +70,9 @@ export const redNoteSingleTask = async function singleTask(
 
     const result = await redNoteWebsite(browser, url, options)
 
-    var dataJson = { McpTaskId: url, rpaResult: JSON.stringify(result) }
+    // var dataJson = { McpTaskId: url, rpaResult: JSON.stringify(result) }
+
+    var dataJson = result
 
     logger.info('爬取结果1:', dataJson)
 

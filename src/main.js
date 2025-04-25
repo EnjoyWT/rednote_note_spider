@@ -5,6 +5,7 @@ import { getStableMacAddress } from './tools/device.js'
 import { redNoteSingleTask } from './rednote/rednote_manger.js'
 // 当前任务状态
 const taskState = {
+  user_rpa_id: '',
   currentTask_id: null, // 当前任务 ID
   currentMcp_task_id: null, // 当前任务 ID
 
@@ -32,8 +33,11 @@ async function sendHeartbeat() {
     action: taskState.action,
     client_id: taskState.client_id,
     client_type: taskState.client_type,
-    uuid: taskState.uuid,
-    rpa: [getCurrentTaskStatus()]
+    uuid: taskState.uuid
+  }
+  const tD = getCurrentTaskStatus()
+  if ('task_id' in tD && tD.task_id != null) {
+    payload.rpa = { task: [tD] }
   }
   console.log('发送心跳请求:', payload)
   try {
@@ -42,9 +46,16 @@ async function sendHeartbeat() {
       logger.error(`心跳请求失败: 响应数据为空`)
       return null
     }
+    console.log('心跳返回:', response.data)
     if (response.data.code !== 200) {
       logger.error(`心跳请求失败: ${JSON.stringify(response.data)}`)
       return null
+    }
+    if (
+      taskState.task.operation_status != null &&
+      taskState.task.operation_status === 2
+    ) {
+      resetTaskStatus()
     }
     return response.data.data
   } catch (error) {
@@ -67,30 +78,48 @@ async function updateTaskStatus(status) {
 async function reportTaskSuccess(params) {
   try {
     updateTaskStatus(params.status)
-    // const response = await addRpaResult(params)
-    // if (response.data.code !== 200) {
-    //   logger.error(
-    //     `上传任务状态任务 ${params.mcp_task_id} 失败: ${JSON.stringify(
-    //       response.data
-    //     )}`
-    //   )
-    //   return
-    // }
-    // logger.info(
-    //   `上传任务状态任务 ${params.mcp_task_id} 成功: ${JSON.stringify(
-    //     response.data
-    //   )}`
-    // )
-    //置空
-    // resetTaskStatus()
+    console.log('上传任务结果-传参:', JSON.stringify(params))
+
+    const response = await addRpaResult(params)
+    if (response.data.code !== 200) {
+      logger.error(
+        `上传任务状态任务 ${params.mcp_task_id} 失败: ${JSON.stringify(
+          response.data
+        )}`
+      )
+      return
+    }
+    logger.info(
+      `上传任务状态任务 ${params.mcp_task_id} 成功: ${JSON.stringify(
+        response.data
+      )}`
+    )
   } catch (error) {
     logger.error(`任务 ${params.mcp_task_id} 失败: ${error.message}`)
   }
 }
 
+function formatDateTime() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  const seconds = String(now.getSeconds()).padStart(2, '0')
+  const milliseconds = String(now.getMilliseconds()).padStart(3, '0')
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`
+}
+
 // 处理心跳返回的任务
 async function handleHeartbeatResponse(task) {
-  if (!task || task.length === 0) {
+  if (
+    !task.task ||
+    task.task.length === 0 ||
+    task.task == null ||
+    task.task === undefined
+  ) {
     logger.warn('心跳返回空任务，跳过')
     return
   }
@@ -114,7 +143,8 @@ async function handleHeartbeatResponse(task) {
   */
 
   // 只获取元素第一个任务
-  const { user_rpa_id, task: innerTask } = task[0]
+  const { user_rpa_id, task: innerTask } = task
+  taskState.user_rpa_id = user_rpa_id
   // 只获取内部任务第一个任务
   if (!innerTask || innerTask.length === 0) {
     logger.warn('心跳返回innerTask 内部任务为空，跳过')
@@ -155,14 +185,14 @@ async function handleHeartbeatResponse(task) {
     taskState.task.task_id = task_id
     taskState.task.mcp_task_id = mcp_task_id
     taskState.task.operation_status = 1
-    taskState.task.operation_time = new Date().toISOString()
+    taskState.task.operation_time = formatDateTime()
 
     try {
       const result = await processTask(command.url)
       if (result !== null && result !== undefined && result !== '') {
         const data = {
           mcp_task_id: mcp_task_id,
-          rpa_result: JSON.stringify(result),
+          rpa_result: result,
           status: 2,
           task_id: task_id
         }
@@ -170,7 +200,7 @@ async function handleHeartbeatResponse(task) {
       } else {
         const data = {
           mcp_task_id: mcp_task_id,
-          rpa_result: JSON.stringify(result),
+          rpa_result: result,
           status: 3,
           task_id: task_id
         }
