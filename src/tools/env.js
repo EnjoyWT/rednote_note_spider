@@ -8,8 +8,9 @@ const __dirname = dirname(__filename)
 
 const args = process.argv.slice(2)
 const modeIndex = args.indexOf('--mode')
-const mode = modeIndex !== -1 ? args[modeIndex + 1] : 'development'
+const mode = modeIndex !== -1 ? args[modeIndex + 1] : 'test'
 
-dotenv.config({ path: resolve(__dirname, `../../.env.${mode}`) })
+const envPath = resolve(__dirname, `../../.env.${mode}`)
+console.log(`✅ 加载环境变量: ${envPath}`)
 
-console.log(`✅ Loaded .env.${mode}`)
+dotenv.config({ path: envPath })

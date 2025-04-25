@@ -1,5 +1,6 @@
 // services/api.js
 import axios from 'axios'
+import { logger } from '../tools/logger.js'
 
 console.log('API 地址:', process.env.GLOBAL_API_URL)
 const api = axios.create({
@@ -8,29 +9,29 @@ const api = axios.create({
 })
 
 // 请求拦截器
-// api.interceptors.request.use(
-//   config => {
-//     // const authStore = useAuthStore()
-//     // // 在发送请求前注入 token 和自定义 header
-//     // config.headers.Authorization = `rpa good`
-//     // config.headers = authStore.getAuthHeaders
-//     // console.log(
-//     //   'config',
-//     //   authStore.shAppId,
-//     //   authStore.shTenantId,
-//     //   authStore.shAuthorization,
-//     // )
-//     // const fullUrl = `${config.baseURL}${config.url}`;
-//     // console.log('config',fullUrl,authStore.shAppId,authStore.shTenantId,authStore.shAuthorization)
-//     // config.headers['SH-Authorization'] = 'eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTU4OTkxOTU0OTAyMTYzMTEzOCwibW9iaWxlIjoiMTc2MDEzNDU0ODUiLCJmcm9tIjoicXVua29uZyIsIm5hbWUiOiLlvpDnlJ_npo8iLCJ0b2tlbiI6bnVsbCwicmZUb2tlbiI6bnVsbCwiYXBwTmFtZSI6bnVsbCwicFRlbmFudElkIjpudWxsLCJwVGVuYW50TmFtZSI6bnVsbCwidW5pcXVlSWQiOjE1ODk5MTk1NDkwMjE2MzExMzgsImRlZmF1bHRUZW5hbnQiOm51bGwsImF2YXRhciI6bnVsbCwiZXhwIjoxNzM1ODk4Mjg5fQ.B44rCuKQdEzKMqWWLKL-ZwQk-Pl-ACW86G3kt9AmD7k';
-//     // config.headers['Sh-Tenant-Id'] = '10000';
-//     // config.headers['Sh-App-Id'] = '17';
-//     return config
-//   },
-//   error => {
-//     return Promise.reject(error)
-//   },
-// )
+api.interceptors.request.use(
+  (config) => {
+    // const authStore = useAuthStore()
+    // // 在发送请求前注入 token 和自定义 header
+    // config.headers.Authorization = `rpa good`
+    // config.headers = authStore.getAuthHeaders
+    // console.log(
+    //   'config',
+    //   authStore.shAppId,
+    //   authStore.shTenantId,
+    //   authStore.shAuthorization,
+    // )
+    // const fullUrl = `${config.baseURL}${config.url}`;
+    // console.log('config',fullUrl,authStore.shAppId,authStore.shTenantId,authStore.shAuthorization)
+    config.headers['SH-Authorization'] =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlvbklkIjo1Mzc1LCJ1c2VyTmFtZSI6IlVfMjI1MTM2MTA4IiwibW9iaWxlIjoiMTM4MTY5NDgxMjAiLCJleElkIjoiIiwicGhvdG9VcmwiOiIiLCJhcHBJZCI6InNoYXVldGVjaC13ZWIiLCJmcm9tIjoicGMtdGVzdCIsInVuaXF1ZUlkIjoxNTg5OTE5NTQ5MDIxNjMwNTExLCJpZCI6MTU4OTkxOTU0OTAyMTYzMDUxMSwiaWF0IjoxNzIyODM1Mzk0LCJleHAiOjE4MDkyMzUzOTR9.h6E8vcDDquu_G9sUy2UUGP9JMWBzoM0x0s_LhhoTiW0'
+    config.headers['skip-auth'] = 1
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
 
 // 响应拦截器
 api.interceptors.response.use(

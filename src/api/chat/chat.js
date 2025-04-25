@@ -4,22 +4,12 @@ import { POST } from '../api.js'
  * API集
  */
 const API = {
-  sendChatRecordRequest: 'ipap/clientImChat/importChatRecord',
-  syncChatTaskRequest: 'ipap/clientImTask/syncChatTask',
-  asynImportChatRecord: 'ipap/clientImChat/asynImportChatRecord',
-  pollingChatAnswer: 'ipap/clientImChat/pollingChatAnswer',
-  redNoteShare: '/monitor/rpaResultService/addRpaResult'
+  addMcpClient: '/monitor/clientInfoService/addMcpClient',
+  heartbeat: '/monitor/clientInfoService/mcpReport',
+  addRpaResult: '/monitor/rpaResultService/addResult'
 }
-export const sendChatRecordRequest = (data = {}) =>
-  POST(API.sendChatRecordRequest, data)
+export const addMcpClient = (data = {}) => POST(API.addMcpClient, data)
 
-export const syncChatTaskRequest = (data = {}) =>
-  POST(API.syncChatTaskRequest, data)
+export const addRpaResult = (data = {}) => POST(API.addRpaResult, data)
 
-export const asynImportChatRecord = (data = {}) =>
-  POST(API.asynImportChatRecord, data)
-
-export const pollingChatAnswer = (data = {}) =>
-  POST(API.pollingChatAnswer, data)
-
-export const redNoteShare = (data = {}) => POST(API.redNoteShare, data)
+export const heartbeat = (data = {}) => POST(API.heartbeat, data)

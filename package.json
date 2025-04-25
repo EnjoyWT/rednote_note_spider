@@ -2,11 +2,11 @@
   "name": "playwright-website-scraper",
   "version": "1.0.0",
   "description": "A specialized web scraper for specific websites using Playwright",
-  "main": "src/index.js",
+  "main": "src/main.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js --mode test",
-    "start:product": "node src/index.js --mode production"
+    "start": "node src/main.js --mode test",
+    "start:product": "node src/main.js --mode production"
   },
   "author": "",
   "license": "MIT",
@@ -14,6 +14,8 @@
     "axios": "^1.8.4",
     "dotenv": "^16.5.0",
     "playwright": "^1.39.0",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
