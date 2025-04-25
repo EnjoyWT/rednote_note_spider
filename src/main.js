@@ -197,14 +197,33 @@ async function handleHeartbeatResponse(task) {
 
 // 心跳循环
 function startHeartbeat() {
+  // setInterval(async () => {
+  //   logger.info('发送心跳') //1: 进行中 2:成功 3:失败 4: 异常
+
+  //   const task = await sendHeartbeat()
+
+  //   console.log('心跳返回任务:', JSON.stringify(task))
+  //   await handleHeartbeatResponse(task)
+  // }, 5000) // 每 5 秒
+
+  let isProcessing = false
   setInterval(async () => {
-    logger.info('发送心跳') //1: 进行中 2:成功 3:失败 4: 异常
-
-    const task = await sendHeartbeat()
-
-    console.log('心跳返回任务:', JSON.stringify(task))
-    await handleHeartbeatResponse(task)
-  }, 5000) // 每 5 秒
+    if (isProcessing) {
+      logger.warn('上一次心跳仍在处理，跳过')
+      return
+    }
+    isProcessing = true
+    try {
+      logger.info('发送心跳')
+      const task = await sendHeartbeat()
+      console.log('心跳返回任务:', JSON.stringify(task))
+      await handleHeartbeatResponse(task)
+    } catch (error) {
+      logger.error(`心跳请求失败: ${error.message}`)
+    } finally {
+      isProcessing = false
+    }
+  }, 5000)
 }
 
 // 捕获未处理的异常
