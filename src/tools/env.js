@@ -14,3 +14,17 @@ const envPath = resolve(__dirname, `../../.env.${mode}`)
 console.log(`✅ 加载环境变量: ${envPath}`)
 
 dotenv.config({ path: envPath })
+
+//从进程中获取参数
+// 提取 --url 参数
+const getArgValue = (argName) => {
+  const index = args.indexOf(argName)
+  return index !== -1 && index + 1 < args.length ? args[index + 1] : null
+}
+
+const urlFromArg = getArgValue('--url')
+// 如果命令行提供了 --url，直接覆盖 process.env.GLOBAL_API_URL
+if (urlFromArg) {
+  process.env.GLOBAL_API_URL = urlFromArg
+  console.log(`🔄 GLOBAL_API_URL 已更新为: ${urlFromArg}`)
+}
