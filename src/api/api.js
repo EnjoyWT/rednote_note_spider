@@ -23,9 +23,15 @@ api.interceptors.request.use(
     // )
     // const fullUrl = `${config.baseURL}${config.url}`;
     // console.log('config',fullUrl,authStore.shAppId,authStore.shTenantId,authStore.shAuthorization)
-    config.headers['SH-Authorization'] =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlvbklkIjo1Mzc1LCJ1c2VyTmFtZSI6IlVfMjI1MTM2MTA4IiwibW9iaWxlIjoiMTM4MTY5NDgxMjAiLCJleElkIjoiIiwicGhvdG9VcmwiOiIiLCJhcHBJZCI6InNoYXVldGVjaC13ZWIiLCJmcm9tIjoicGMtdGVzdCIsInVuaXF1ZUlkIjoxNTg5OTE5NTQ5MDIxNjMwNTExLCJpZCI6MTU4OTkxOTU0OTAyMTYzMDUxMSwiaWF0IjoxNzIyODM1Mzk0LCJleHAiOjE4MDkyMzUzOTR9.h6E8vcDDquu_G9sUy2UUGP9JMWBzoM0x0s_LhhoTiW0'
+
+    if (process.env.shToken) {
+      config.headers['SH-Authorization'] = process.env.shToken
+    } else {
+      config.headers['SH-Authorization'] =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlvbklkIjo1Mzc1LCJ1c2VyTmFtZSI6IlVfMjI1MTM2MTA4IiwibW9iaWxlIjoiMTM4MTY5NDgxMjAiLCJleElkIjoiIiwicGhvdG9VcmwiOiIiLCJhcHBJZCI6InNoYXVldGVjaC13ZWIiLCJmcm9tIjoicGMtdGVzdCIsInVuaXF1ZUlkIjoxNTg5OTE5NTQ5MDIxNjMwNTExLCJpZCI6MTU4OTkxOTU0OTAyMTYzMDUxMSwiaWF0IjoxNzIyODM1Mzk0LCJleHAiOjE4MDkyMzUzOTR9.h6E8vcDDquu_G9sUy2UUGP9JMWBzoM0x0s_LhhoTiW0'
+    }
     config.headers['skip-auth'] = 1
+
     return config
   },
   (error) => {

@@ -28,3 +28,17 @@ if (urlFromArg) {
   process.env.GLOBAL_API_URL = urlFromArg
   console.log(`🔄 GLOBAL_API_URL 已更新为: ${urlFromArg}`)
 }
+
+const tokenFromArg = getArgValue('--token')
+// 如果命令行提供了 --token，直接覆盖 process.env.shToken
+if (tokenFromArg) {
+  process.env.shToken = tokenFromArg
+  console.log(`🔄 shToken 已更新为: ${tokenFromArg}`)
+}
+
+const chromeFromArg = getArgValue('--chromePath')
+// 如果命令行提供了 --chrome，直接覆盖 process.env.CHROME_PATH
+if (chromeFromArg) {
+  process.env.CHROME_PATH = chromeFromArg
+  console.log(`🔄 CHROME_PATH 已更新为: ${chromeFromArg}`)
+}
