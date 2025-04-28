@@ -1,6 +1,6 @@
 // services/api.js
-import axios from 'axios'
-import { logger } from '../tools/logger.js'
+const axios = require('axios')
+const { logger } = require('../tools/logger.js')
 
 console.log('API 地址:', process.env.GLOBAL_API_URL)
 const api = axios.create({
@@ -55,7 +55,7 @@ api.interceptors.response.use(
  * @description GET
  * @returns
  */
-export const GET = (url, params) => {
+const GET = (url, params) => {
   const { onDownloadProgress } = params || {}
   return api.get(url, { params }, { onDownloadProgress })
 }
@@ -64,8 +64,13 @@ export const GET = (url, params) => {
  * @description POST
  * @returns
  */
-export const POST = (url, params) => {
+const POST = (url, params) => {
   const { onDownloadProgress } = params || {}
   return api.post(url, params, { onDownloadProgress })
 }
-export default api
+
+module.exports = {
+  api,
+  GET,
+  POST
+}

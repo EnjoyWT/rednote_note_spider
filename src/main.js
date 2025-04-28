@@ -1,8 +1,11 @@
-import './tools/env.js' // 一定要最顶上！优先加载
-import { logger } from './tools/logger.js'
-import { addMcpClient, heartbeat, addRpaResult } from './api/chat/chat.js'
-import { getStableMacAddress } from './tools/device.js'
-import { redNoteSingleTask } from './rednote/rednote_manger.js'
+require('./tools/env.js') // 一定要最顶上！优先加载
+const logger = require('./tools/logger.js')
+const { getStableMacAddress } = require('./tools/device.js')
+
+const { addMcpClient, heartbeat, addRpaResult } = require('./api/chat/chat.js')
+
+const { redNoteSingleTask } = require('./rednote/rednote_manger.js')
+
 // 当前任务状态
 const taskState = {
   user_rpa_id: '',

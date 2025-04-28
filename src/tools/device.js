@@ -1,10 +1,10 @@
-import os from 'os'
+const os = require('os')
 
 /**
  * 获取较稳定的真实 MAC 地址（排除虚拟网卡、回环地址、IPv6）
  * @returns {string | null}
  */
-export function getStableMacAddress() {
+const getStableMacAddress = function getStableMacAddress() {
   const interfaces = os.networkInterfaces()
 
   const isRealInterface = (name) => {
@@ -27,4 +27,7 @@ export function getStableMacAddress() {
   }
 
   return null
+}
+module.exports = {
+  getStableMacAddress
 }

@@ -1,5 +1,4 @@
-// const { chromium } = require('playwright')
-import { chromium } from 'playwright'
+const { chromium } = require('playwright')
 /**
  * 爬取单个网站的数据，使用已存在的浏览器实例
  * @param {Browser} browser - Playwright浏览器实例
@@ -7,8 +6,7 @@ import { chromium } from 'playwright'
  * @param {Object} options - 配置选项
  * @returns {Promise<Object>} - 返回爬取结果对象
  */
-
-export const redNoteWebsite = async function redNoteWebsite(
+const redNoteWebsite = async function redNoteWebsite(
   browser,
   url,
   options = {}
@@ -19,7 +17,7 @@ export const redNoteWebsite = async function redNoteWebsite(
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
   }
 
-  // 合并选项
+  // 合并选项f
   const mergedOptions = { ...defaultOptions, ...options }
 
   console.log(`开始爬取URL: ${url}`)
@@ -197,6 +195,17 @@ export const redNoteWebsite = async function redNoteWebsite(
       }
     }
 
+    //检查是否有弹窗存在,有直接关闭 #app > div:nth-child(1) > div > div.login-container > div.icon-btn-wrapper.close-button > svg
+    // const closeLocator = page.locator(
+    //   '#app > div:nth-child(1) > div > div.login-container > div.icon-btn-wrapper.close-button > svg'
+    // )
+    // if ((await closeLocator.count()) > 0) {
+    //   console.log('✅ 找到弹窗，直接关闭')
+    //   await closeLocator.click()
+    // } else {
+    //   console.log('❌ 没有找到弹窗')
+    // }
+
     // 关闭上下文
     await context.close()
     console.log(`🏁 ${url} 爬取完成`)
@@ -209,6 +218,6 @@ export const redNoteWebsite = async function redNoteWebsite(
   }
 }
 
-// module.exports = {
-//   redNoteWebsite
-// }
+module.exports = {
+  redNoteWebsite
+}

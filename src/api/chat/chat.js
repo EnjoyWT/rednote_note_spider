@@ -1,4 +1,4 @@
-import { POST } from '../api.js'
+const { POST } = require('../api.js')
 
 /**
  * API集
@@ -8,8 +8,14 @@ const API = {
   heartbeat: '/monitor/clientInfoService/mcpReport',
   addRpaResult: '/monitor/rpaResultService/addResult'
 }
-export const addMcpClient = (data = {}) => POST(API.addMcpClient, data)
+const addMcpClient = (data = {}) => POST(API.addMcpClient, data)
 
-export const addRpaResult = (data = {}) => POST(API.addRpaResult, data)
+const addRpaResult = (data = {}) => POST(API.addRpaResult, data)
 
-export const heartbeat = (data = {}) => POST(API.heartbeat, data)
+const heartbeat = (data = {}) => POST(API.heartbeat, data)
+
+module.exports = {
+  addMcpClient,
+  addRpaResult,
+  heartbeat
+}

@@ -3,16 +3,19 @@
   "version": "1.0.0",
   "description": "A specialized web scraper for specific websites using Playwright",
   "main": "src/main.js",
-  "type": "module",
   "scripts": {
     "start": "node src/main.js --mode test",
-    "start:product": "node src/main.js --mode production"
+    "start:product": "node src/main.js --mode production",
+    "dist": "pkg . --no-bytecode --out-path out --targets node18-win-x64 --public-packages axios,winston,winston-daily-rotate-file "
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@vercel/ncc": "^0.38.3",
     "axios": "^1.8.4",
     "dotenv": "^16.5.0",
+    "minimist": "^1.2.8",
+    "pkg": "^5.8.1",
     "playwright": "^1.39.0",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0",
@@ -23,5 +26,6 @@
   },
   "engines": {
     "node": ">=14.0.0"
-  }
+  },
+  "bin": "src/main.js"
 }

@@ -1,68 +1,68 @@
-import winston from 'winston'
-import DailyRotateFile from 'winston-daily-rotate-file'
-import path from 'path'
-import fs from 'fs/promises'
-import { fileURLToPath } from 'url'
+const winston = require('winston')
+const DailyRotateFile = require('winston-daily-rotate-file')
+const path = require('path')
+const fs = require('fs').promises
 
-// 获取 __dirname 在 ESM 模块中
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-// 日志目录
-const logDir = path.join(__dirname, '../../logs')
+const logDir = process.env.LOG_DIR || path.join(__dirname, 'logs')
 
 class Logger {
   #logger
 
   constructor() {
-    // 确保日志目录存在
     this.#initLogDir()
-    // 初始化 winston 日志
-    this.#logger = winston.createLogger({
-      level: 'info',
-      format: winston.format.combine(
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        winston.format.printf(({ timestamp, level, message }) => {
-          return `[${timestamp}] ${level.toUpperCase()}: ${message}`
+      .then(() => {
+        this.#logger = winston.createLogger({
+          level: 'info',
+          format: winston.format.combine(
+            winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+            winston.format.errors({ stack: true }), // Include stack traces for errors
+            winston.format.printf(({ timestamp, level, message, stack }) => {
+              return `[${timestamp}] ${level.toUpperCase()}: ${message}${
+                stack ? `\n${stack}` : ''
+              }`
+            })
+          ),
+          transports: [
+            new winston.transports.Console(),
+            new DailyRotateFile({
+              dirname: logDir,
+              filename: '%DATE%.log',
+              datePattern: 'YYYY-MM-DD',
+              maxFiles: '7d',
+              zippedArchive: false
+            })
+          ]
         })
-      ),
-      transports: [
-        // 控制台输出
-        new winston.transports.Console(),
-        // 按日期分割的日志文件
-        new DailyRotateFile({
-          dirname: logDir,
-          filename: '%DATE%.log',
-          datePattern: 'YYYY-MM-DD',
-          maxFiles: '7d', // 保留 7 天的日志
-          zippedArchive: false // 不压缩旧日志
-        })
-      ]
-    })
+      })
+      .catch((err) => {
+        console.error('Failed to initialize logger:', err)
+        throw err // Ensure the application knows logger initialization failed
+      })
   }
 
-  // 初始化日志目录
   async #initLogDir() {
     try {
       await fs.mkdir(logDir, { recursive: true })
     } catch (err) {
-      console.error('创建日志目录失败:', err)
+      console.error('Failed to create log directory:', err)
+      throw err
     }
   }
 
-  // 记录 info 级别日志
   info(message) {
-    this.#logger.info(message)
+    if (this.#logger) this.#logger.info(message)
+    else console.log('Logger not initialized:', message)
   }
 
-  // 记录 error 级别日志
   error(message) {
-    this.#logger.error(message)
+    if (this.#logger) this.#logger.error(message)
+    else console.error('Logger not initialized:', message)
   }
-  // 记录 warn 级别日志
+
   warn(message) {
-    this.#logger.warn(message)
+    if (this.#logger) this.#logger.warn(message)
+    else console.warn('Logger not initialized:', message)
   }
 }
 
-// 导出单例实例
-export const logger = new Logger()
+module.exports = new Logger()
