@@ -25,7 +25,7 @@ async function processTask(url) {
     const result = await redNoteSingleTask(url)
     return result
   } catch (err) {
-    logger.error(`任务 ${task.taskId} 失败: ${err.message}`)
+    logger.error(`任务 ${url} 失败: ${err.message}`)
     throw err
   }
 }
@@ -42,7 +42,7 @@ async function sendHeartbeat() {
   if (tD.task_id != null || tD.mcp_task_id != null) {
     payload.rpa = { task: [tD] }
   }
-  if (taskState?.user_rpa_id) {
+  if (taskState?.user_rpa_id && payload.rpa) {
     payload.rpa.user_rpa_id = taskState.user_rpa_id
   }
 

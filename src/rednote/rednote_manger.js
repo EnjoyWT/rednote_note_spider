@@ -75,10 +75,15 @@ function redNoteSingleTask(url = null, options = {}) {
       // logger.info('服务器返回结果:', JSON.stringify(data.data));
 
       // 处理结果
-      logger.info('\n爬取结果摘要:')
-      logger.info(`笔记类型: ${result.type}`)
-      logger.info(`照片数量: ${result.photoUrls.length}`)
-      logger.info(`视频数量: ${result.videoUrls.length}`)
+      if (result) {
+        logger.info('\n爬取结果摘要:')
+        logger.info(`笔记类型: ${result.type}`)
+        logger.info(`照片数量: ${result.photoUrls.length}`)
+        logger.info(`视频数量: ${result.videoUrls.length}`)
+      } else {
+        logger.warn('内容爬取数据为空')
+      }
+
       await browser.close()
 
       resolve(dataJson)
