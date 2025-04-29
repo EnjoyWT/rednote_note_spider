@@ -39,9 +39,13 @@ async function sendHeartbeat() {
     uuid: taskState.uuid
   }
   const tD = getCurrentTaskStatus()
-  if ('task_id' in tD && tD.task_id != null) {
+  if (tD.task_id != null || tD.mcp_task_id != null) {
     payload.rpa = { task: [tD] }
   }
+  if (taskState?.user_rpa_id) {
+    payload.rpa.user_rpa_id = taskState.user_rpa_id
+  }
+
   console.log('发送心跳请求:', payload)
   try {
     const response = await heartbeat(payload)
@@ -147,6 +151,7 @@ async function handleHeartbeatResponse(task) {
 
   // 只获取元素第一个任务
   const { user_rpa_id, task: innerTask } = task
+  console.log('心跳返回任务user_rpa_id:', user_rpa_id)
   taskState.user_rpa_id = user_rpa_id
   // 只获取内部任务第一个任务
   if (!innerTask || innerTask.length === 0) {
@@ -197,7 +202,8 @@ async function handleHeartbeatResponse(task) {
           mcp_task_id: mcp_task_id,
           rpa_result: result,
           status: 2,
-          task_id: task_id
+          task_id: task_id,
+          message: '小红书内容抓取成功'
         }
         reportTaskSuccess(data)
       } else {
@@ -205,7 +211,8 @@ async function handleHeartbeatResponse(task) {
           mcp_task_id: mcp_task_id,
           rpa_result: result,
           status: 3,
-          task_id: task_id
+          task_id: task_id,
+          message: '小红书内容抓取失败'
         }
         reportTaskSuccess(data)
       }
@@ -216,7 +223,8 @@ async function handleHeartbeatResponse(task) {
         mcp_task_id: mcp_task_id,
         rpa_result: JSON.stringify(err.message),
         status: 4,
-        task_id: task_id
+        task_id: task_id,
+        message: err.message
       }
       reportTaskSuccess(data)
     } finally {
@@ -230,15 +238,6 @@ async function handleHeartbeatResponse(task) {
 
 // 心跳循环
 function startHeartbeat() {
-  // setInterval(async () => {
-  //   logger.info('发送心跳') //1: 进行中 2:成功 3:失败 4: 异常
-
-  //   const task = await sendHeartbeat()
-
-  //   console.log('心跳返回任务:', JSON.stringify(task))
-  //   await handleHeartbeatResponse(task)
-  // }, 5000) // 每 5 秒
-
   let isProcessing = false
   setInterval(async () => {
     if (isProcessing) {

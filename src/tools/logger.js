@@ -3,7 +3,8 @@ const DailyRotateFile = require('winston-daily-rotate-file')
 const path = require('path')
 const fs = require('fs').promises
 
-const logDir = process.env.LOG_DIR || path.join(__dirname, 'logs')
+// const logDir = process.env.LOG_DIR || path.join(__dirname, 'logs')
+const logDir = process.env.LOG_DIR || path.join(process.cwd(), 'logs')
 
 class Logger {
   #logger

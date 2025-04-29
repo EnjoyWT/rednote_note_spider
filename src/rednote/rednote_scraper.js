@@ -1,4 +1,6 @@
 const { chromium } = require('playwright')
+const logger = require('../tools/logger.js')
+
 /**
  * 爬取单个网站的数据，使用已存在的浏览器实例
  * @param {Browser} browser - Playwright浏览器实例
@@ -20,7 +22,7 @@ const redNoteWebsite = async function redNoteWebsite(
   // 合并选项f
   const mergedOptions = { ...defaultOptions, ...options }
 
-  console.log(`开始爬取URL: ${url}`)
+  logger.info(`开始爬取URL: ${url}`)
 
   try {
     // 创建新的浏览器上下文
@@ -49,7 +51,7 @@ const redNoteWebsite = async function redNoteWebsite(
         url.includes('.m3u8')
       ) {
         videoUrls.add(url)
-        console.log(`捕获到可能的视频请求: ${url}`)
+        logger.info(`捕获到可能的视频请求: ${url}`)
       }
     })
     // 导航到目标URL
@@ -58,7 +60,7 @@ const redNoteWebsite = async function redNoteWebsite(
     try {
       await page.waitForLoadState('networkidle', { timeout: 5000 }) // 最多等 60 秒
     } catch (e) {
-      console.warn(
+      logger.warn(
         '⚠️ 页面长时间处于活跃状态，跳过 networkidle 检查，继续处理。'
       )
     }
@@ -76,6 +78,7 @@ const redNoteWebsite = async function redNoteWebsite(
 
     let isVideo = false
 
+    let haveGetContent = false
     try {
       // 定位目标元素（例如某个选择器）
       const elementLocator = page.locator(
@@ -84,14 +87,14 @@ const redNoteWebsite = async function redNoteWebsite(
       const elementCount = await elementLocator.count()
 
       if (elementCount > 0) {
-        console.log(`当前笔记是==视频类型`)
+        logger.info(`当前笔记是==视频类型`)
         isVideo = true
         result.type = 1
       } else {
-        console.log(' 当前笔记是-图文类型 ')
+        logger.info(' 当前笔记是-图文类型 ')
       }
     } catch (error) {
-      console.error('❌ 检查元素是否存在时出错:', error.message)
+      logger.error('❌ 检查元素是否存在时出错:', error.message)
     }
 
     // 提取页面标题
@@ -100,19 +103,22 @@ const redNoteWebsite = async function redNoteWebsite(
       const titleElement = page.locator('#detail-title') // 使用 CSS 选择器，更简洁
       if (titleElement) {
         result.title = await titleElement.textContent()
-        console.log(`✅ 成功提取页面标题: ${result.title}`)
+        logger.info(`✅ 成功提取页面标题: ${result.title}`)
+        haveGetContent = true
       }
     } catch (error) {
-      console.error('❌ 提取页面标题时出错:', error.message)
+      logger.error('❌ 提取页面标题时出错:', error.message)
     }
     try {
       const contentLocator = page.locator('#detail-desc') // 使用 CSS 选择器，更简洁
       if (contentLocator) {
         result.content = await contentLocator.textContent()
-        console.log(`✅ 成功提取页面内容: ${result.content}`)
+        haveGetContent = true
+
+        logger.info(`✅ 成功提取页面内容: ${result.content}`)
       }
     } catch (error) {
-      console.error('❌ 提取页面内容时出错:', error.message)
+      logger.error('❌ 提取页面内容时出错:', error.message)
     }
 
     try {
@@ -121,10 +127,11 @@ const redNoteWebsite = async function redNoteWebsite(
       )
       if (editorTimeLocator) {
         result.editorTimeCity = await editorTimeLocator.textContent()
-        console.log(`✅ 成功提取页面编辑时间: ${result.editorTimeCity}`)
+        logger.info(`✅ 成功提取页面编辑时间: ${result.editorTimeCity}`)
+        haveGetContent = true
       }
     } catch (error) {
-      console.error('❌ 提取页面编辑时间时出错:', error.message)
+      logger.error('❌ 提取页面编辑时间时出错:', error.message)
     }
 
     if (isVideo) {
@@ -134,13 +141,14 @@ const redNoteWebsite = async function redNoteWebsite(
 
         // 检查是否捕获到视频 URL
         if (videoUrls.size > 0) {
-          console.log(`✅ 捕获到 ${videoUrls.size} 个可能的视频地址`)
+          logger.info(`✅ 捕获到 ${videoUrls.size} 个可能的视频地址`)
           Array.from(videoUrls).forEach((url, index) => {
-            console.log(`视频 ${index + 1}: ${url}`)
+            logger.info(`视频 ${index + 1}: ${url}`)
           })
           result.videoUrls = [...videoUrls]
+          haveGetContent = true
         } else {
-          console.log(
+          logger.info(
             '❌ 没有捕获到视频地址，可能需要更长时间等待或模拟用户行为'
           )
 
@@ -154,16 +162,17 @@ const redNoteWebsite = async function redNoteWebsite(
             if (videoUrls.size > 0) {
               console.log(`✅ 播放后捕获到 ${videoUrls.size} 个可能的视频地址`)
               Array.from(videoUrls).forEach((url, index) => {
-                console.log(`视频 ${index + 1}: ${url}`)
+                logger.info(`视频 ${index + 1}: ${url}`)
               })
               result.videoUrls = [...videoUrls]
+              haveGetContent = true
             } else {
-              console.log('❌ 播放后仍未捕获到视频地址')
+              logger.info('❌ 播放后仍未捕获到视频地址')
             }
           }
         }
       } catch (error) {
-        console.error('❌ 捕获视频地址时出错:', error.message)
+        logger.error('❌ 捕获视频地址时出错:', error.message)
       }
     } else {
       try {
@@ -175,7 +184,7 @@ const redNoteWebsite = async function redNoteWebsite(
         const imageCount = await imageLocator.count()
 
         if (imageCount > 0) {
-          console.log(`✅ 找到 ${imageCount} 张轮播图图片`)
+          logger.info(`✅ 找到 ${imageCount} 张轮播图图片`)
 
           // 提取所有图片的 src 属性
           const imageUrls = await imageLocator.evaluateAll((elements) =>
@@ -187,11 +196,12 @@ const redNoteWebsite = async function redNoteWebsite(
           //   console.log(`图片 ${index + 1}: ${url}`)
           // })
           result.photoUrls = imageUrls
+          haveGetContent = true
         } else {
-          console.log('❌ 没有找到轮播图中的图片')
+          logger.info('❌ 没有找到轮播图中的图片')
         }
       } catch (error) {
-        console.error('❌ 获取轮播图图片链接时出错:', error.message)
+        logger.error('❌ 获取轮播图图片链接时出错:', error.message)
       }
     }
 
@@ -208,12 +218,16 @@ const redNoteWebsite = async function redNoteWebsite(
 
     // 关闭上下文
     await context.close()
-    console.log(`🏁 ${url} 爬取完成`)
+    logger.info(`🏁 ${url} 爬取完成`)
 
     // 返回结果
-    return result
+    if (haveGetContent) {
+      return result
+    } else {
+      return null
+    }
   } catch (error) {
-    console.error(`❌ 爬取 ${url} 失败:`, error)
+    logger.error(`❌ 爬取 ${url} 失败:`, error)
     throw error
   }
 }

@@ -35,9 +35,9 @@ function redNoteTasks(urls = [], options = {}) {
 
         logger.info('爬取结果1:', dataJson)
 
-        const data = await addRpaResult(dataJson)
+        // const data = await addRpaResult(dataJson)
 
-        logger.info('Response111:', JSON.stringify(data.data))
+        // logger.info('Response111:', JSON.stringify(data.data))
         // 处理结果
         logger.info('\n爬取结果摘要:')
         logger.info(`笔记类型: ${result.type}`)
@@ -46,10 +46,10 @@ function redNoteTasks(urls = [], options = {}) {
       }
       await browser.close()
 
-      resolve('success33')
+      resolve(dataJson)
     } catch (error) {
       logger.error(`任务${ttUrl}爬取任务失败:`, error)
-      // reject(error);
+      reject(error)
     }
   })
 }
@@ -79,7 +79,7 @@ function redNoteSingleTask(url = null, options = {}) {
       logger.info(`笔记类型: ${result.type}`)
       logger.info(`照片数量: ${result.photoUrls.length}`)
       logger.info(`视频数量: ${result.videoUrls.length}`)
-      // await browser.close();
+      await browser.close()
 
       resolve(dataJson)
     } catch (error) {
@@ -96,7 +96,7 @@ function main() {
   const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
   firstColumnData = data.slice(0).map((row) => row[0])
 
-  firstColumnData = ['http://xhslink.com/a/xVeeNX6IskQab']
+  firstColumnData = ['http://xhslink.com/a/PhHV7wwuixibb']
   redNoteTasks(firstColumnData)
     .then((result) => {
       console.log('\n完整爬取结果:')
