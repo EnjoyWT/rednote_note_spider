@@ -16,6 +16,7 @@ const taskState = {
   uuid: '',
   client_type: 'rpa',
   action: 'rednoteshare2',
+  message: '',
   task: {}
 }
 
@@ -36,7 +37,8 @@ async function sendHeartbeat() {
     action: taskState.action,
     client_id: taskState.client_id,
     client_type: taskState.client_type,
-    uuid: taskState.uuid
+    uuid: taskState.uuid,
+    message: taskState.message
   }
   const tD = getCurrentTaskStatus()
   if (tD.task_id != null || tD.mcp_task_id != null) {
@@ -79,12 +81,12 @@ function getCurrentTaskStatus() {
 function resetTaskStatus() {
   taskState.task = {}
 }
-async function updateTaskStatus(status) {
+async function updateTaskStatus(status, msg) {
   taskState.task.operation_status = status
+  taskState.message = msg
 }
 async function reportTaskSuccess(params) {
   try {
-    updateTaskStatus(params.status)
     console.log('上传任务结果-传参:', JSON.stringify(params))
 
     const response = await addRpaResult(params)
@@ -205,28 +207,16 @@ async function handleHeartbeatResponse(task) {
           task_id: task_id,
           message: '小红书内容抓取成功'
         }
+        updateTaskStatus(2, '小红书内容抓取成功')
+
         reportTaskSuccess(data)
       } else {
-        const data = {
-          mcp_task_id: mcp_task_id,
-          rpa_result: result,
-          status: 3,
-          task_id: task_id,
-          message: '小红书内容抓取失败'
-        }
-        reportTaskSuccess(data)
+        updateTaskStatus(3, '小红书内容抓取失败')
       }
     } catch (err) {
       //
       logger.error(`任务 ${mcp_task_id} 失败: ${err.message}`)
-      const data = {
-        mcp_task_id: mcp_task_id,
-        rpa_result: JSON.stringify(err.message),
-        status: 4,
-        task_id: task_id,
-        message: err.message
-      }
-      reportTaskSuccess(data)
+      updateTaskStatus(4, err.message)
     } finally {
       taskState.isRunning = false
       taskState.currentMcp_task_id = null
