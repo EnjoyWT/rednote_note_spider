@@ -1,6 +1,6 @@
 // services/api.js
 const axios = require('axios')
-const { logger } = require('../tools/logger.js')
+const logger = require('../tools/logger.js')
 
 console.log('API 地址:', process.env.GLOBAL_API_URL)
 const api = axios.create({
@@ -27,6 +27,7 @@ api.interceptors.request.use(
     if (process.env.shToken) {
       config.headers['SH-Authorization'] = process.env.shToken
     } else {
+      logger.info('使用默认配置 token')
       config.headers['SH-Authorization'] =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlvbklkIjo1Mzc1LCJ1c2VyTmFtZSI6IlVfMjI1MTM2MTA4IiwibW9iaWxlIjoiMTM4MTY5NDgxMjAiLCJleElkIjoiIiwicGhvdG9VcmwiOiIiLCJhcHBJZCI6InNoYXVldGVjaC13ZWIiLCJmcm9tIjoicGMtdGVzdCIsInVuaXF1ZUlkIjoxNTg5OTE5NTQ5MDIxNjMwNTExLCJpZCI6MTU4OTkxOTU0OTAyMTYzMDUxMSwiaWF0IjoxNzIyODM1Mzk0LCJleHAiOjE4MDkyMzUzOTR9.h6E8vcDDquu_G9sUy2UUGP9JMWBzoM0x0s_LhhoTiW0'
     }

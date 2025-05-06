@@ -187,9 +187,35 @@ const redNoteWebsite = async function redNoteWebsite(
           logger.info(`✅ 找到 ${imageCount} 张轮播图图片`)
 
           // 提取所有图片的 src 属性
-          const imageUrls = await imageLocator.evaluateAll((elements) =>
-            elements.map((el) => el.getAttribute('src'))
-          )
+          // const imageUrls = await imageLocator.evaluateAll((elements) =>
+          //   elements.map((el) => el.getAttribute('src'))
+          // )
+
+          const imageUrls = await imageLocator.evaluateAll((elements) => {
+            const srcList = elements
+              .map((el) => el.getAttribute('src'))
+              .filter(Boolean)
+
+            if (srcList.length < 2) return srcList
+
+            const first = srcList[0]
+            const last = srcList[srcList.length - 1]
+
+            const firstCount = srcList
+              .slice(1)
+              .filter((src) => src === first).length
+            const lastCount = srcList
+              .slice(0, -1)
+              .filter((src) => src === last).length
+
+            if (firstCount > 0 || lastCount > 0) {
+              return srcList.slice(1, -1) // 去掉首尾
+            }
+
+            return srcList
+          })
+
+          console.log(imageUrls)
 
           // 输出图片链接
           // imageUrls.forEach((url, index) => {

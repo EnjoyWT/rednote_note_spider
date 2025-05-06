@@ -268,6 +268,7 @@ async function registerDevice() {
       client_id: macAddress,
       client_type: 'rpa'
     }
+    console.log(payload)
 
     const response = await addMcpClient(payload)
 
