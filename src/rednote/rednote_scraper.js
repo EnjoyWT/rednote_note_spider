@@ -8,33 +8,18 @@ const logger = require('../tools/logger.js')
  * @param {Object} options - 配置选项
  * @returns {Promise<Object>} - 返回爬取结果对象
  */
-const redNoteWebsite = async function redNoteWebsite(
-  browser,
-  url,
-  options = {}
-) {
-  const defaultOptions = {
-    timeout: 30000,
-    userAgent:
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
-  }
-
-  // 合并选项f
-  const mergedOptions = { ...defaultOptions, ...options }
-
+const redNoteWebsite = async function redNoteWebsite(browser, url) {
   logger.info(`开始爬取URL: ${url}`)
 
   try {
     // 创建新的浏览器上下文
-    const context = await browser.newContext({
-      userAgent: mergedOptions.userAgent,
-      viewport: { width: 1280, height: 800 }
-    })
 
-    const page = await context.newPage()
+    const page = browser.contexts()[0].pages()[0]
 
+    if (!page) {
+      return
+    }
     // 设置超时
-    page.setDefaultTimeout(mergedOptions.timeout)
 
     // 用于存储捕获的视频 URL
     const videoUrls = new Set()
@@ -99,7 +84,6 @@ const redNoteWebsite = async function redNoteWebsite(
 
     // 提取页面标题
     try {
-      // const titleElement = await page.$('//*[@id="detail-title"]')
       const titleElement = page.locator('#detail-title') // 使用 CSS 选择器，更简洁
       if (titleElement) {
         result.title = await titleElement.textContent()
@@ -243,7 +227,7 @@ const redNoteWebsite = async function redNoteWebsite(
     // }
 
     // 关闭上下文
-    await context.close()
+    // await page.close()
     logger.info(`🏁 ${url} 爬取完成`)
 
     // 返回结果

@@ -5,6 +5,7 @@ const { getStableMacAddress } = require('./tools/device.js')
 const { addMcpClient, heartbeat, addRpaResult } = require('./api/chat/chat.js')
 
 const { redNoteSingleTask } = require('./rednote/rednote_manger.js')
+const { chromium } = require('playwright')
 
 // 当前任务状态
 const taskState = {
@@ -293,9 +294,30 @@ async function registerDevice() {
     throw error // 保留原始错误堆栈
   }
 }
+
+let browser = null
+
 // 启动服务
 async function main() {
   logger.info('服务启动')
+
+  try {
+    console.log('尝试连接到 Chrome...')
+    // 可以尝试延长超时时间
+    browser = await chromium.connectOverCDP('http://localhost:9888', {
+      timeout: 30000
+    })
+
+    // await browser.close()
+  } catch (error) {
+    console.error('连接失败:', error)
+  }
+
+  if (browser == null) {
+    console.error('Chrome 连接失败:')
+    return
+  }
+
   await registerDevice()
     .then(({ uuid, client_id }) => {
       console.log('设备注册成功:', { uuid, client_id })

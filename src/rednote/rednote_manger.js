@@ -4,6 +4,7 @@ const { addRpaResult } = require('../api/chat/chat.js')
 const logger = require('../tools/logger.js')
 const XLSX = require('xlsx')
 const path = require('path')
+const { chromium } = require('playwright')
 
 // 读取变量
 console.log('API 地址:', process.env.GLOBAL_API_URL)
@@ -54,15 +55,13 @@ function redNoteTasks(urls = [], options = {}) {
   })
 }
 
-function redNoteSingleTask(url = null, options = {}) {
+function redNoteSingleTask(browser, url = null, options = {}) {
   if (!url || url.length === 0) {
     throw new Error('未提供URL列表')
   }
   return new Promise(async (resolve, reject) => {
     try {
       logger.info('开始爬取任务...')
-
-      const browser = await createBrowser()
 
       const result = await redNoteWebsite(browser, url, options)
 
@@ -84,7 +83,7 @@ function redNoteSingleTask(url = null, options = {}) {
         logger.warn('内容爬取数据为空')
       }
 
-      await browser.close()
+      // await browser.close()
 
       resolve(dataJson)
     } catch (error) {
@@ -94,15 +93,37 @@ function redNoteSingleTask(url = null, options = {}) {
   })
 }
 
-function main() {
-  const workbook = XLSX.readFile('/Users/sh/Desktop/work/red_note/data.xlsx')
-  const worksheet = workbook.Sheets[workbook.SheetNames[0]]
-  let firstColumnData = []
-  const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
-  firstColumnData = data.slice(0).map((row) => row[0])
+async function main() {
+  // const workbook = XLSX.readFile('/Users/sh/Desktop/work/red_note/data.xlsx')
+  // const worksheet = workbook.Sheets[workbook.SheetNames[0]]
+  // let firstColumnData = []
+  // const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
+  // firstColumnData = data.slice(0).map((row) => row[0])
 
-  firstColumnData = ['http://xhslink.com/a/PhHV7wwuixibb']
-  redNoteTasks(firstColumnData)
+  // firstColumnData = ['http://xhslink.com/a/PhHV7wwuixibb']
+  // firstColumnData = ['http://xhslink.com/a/GK63IXhabqRbb']
+  let url = 'http://xhslink.com/a/GlZjExcfHoRbb'
+
+  let browser = null
+
+  try {
+    console.log('尝试连接到 Chrome...')
+    // 可以尝试延长超时时间
+    browser = await chromium.connectOverCDP('http://localhost:9222', {
+      timeout: 30000
+    })
+    console.log('Chrome 连接成功')
+    // await browser.close()
+  } catch (error) {
+    console.error('连接失败:', error)
+  }
+
+  if (browser == null) {
+    console.error('Chrome 连接失败:')
+    return
+  }
+
+  redNoteSingleTask(browser, url)
     .then((result) => {
       console.log('\n完整爬取结果:')
       console.log(JSON.stringify(result, null, 2))
